@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<link rel="stylesheet" th:href="@{/css/semantic.css}">
+<link rel="stylesheet" th:href="@{/css/join.css}">
+<script th:src="@{/js/jquery-3.5.1.js}"></script>
+<body>
+	<form action="saveChannel" method="POST">
+		<div class="joinTop">
+			<img src="/images/hive_whitelogo.png" class="joinLogo">
+		</div>
+		<div class="join">
+			<div class="welcome">첫 채널의 이름은 뭘로 할까요?</div>
+			<div>
+				<input type="text" class="checknull" name="name" placeholder="채널 이름을 입력하세요." required>
+			</div>
+			<button type="submit" class="channelSaveBtn">채널 설정</button>
+			<!-- 	<button type="button" class="channelSaveBtn" onclick="location.href='memberInvite'">나중에 하기</button> -->
+		</div>
+	</form>
+</body>
+</html>

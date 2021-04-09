@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ee.hive.dao.DocumentDao">
+	<select id="selectAll" resultType="com.ee.hive.entities.Document">
+		select * from document;
+	</select>
+	
+	<select id="selectOne" resultType="com.ee.hive.entities.Document">
+		select * from document where docuseq = #{docuseq};
+	</select>
+	
+	<select id="selectFromMe" resultType="com.ee.hive.entities.Document">
+		select *, DATE_FORMAT(createdat,'%m월 %d일') as day, DATE_FORMAT(createdat,'%p %h시 %i분') as time from document where senderid = #{userid} and workid= #{workid};
+	</select>
+		
+	<select id="selectToMe" resultType="com.ee.hive.entities.Document">
+		select *, DATE_FORMAT(createdat,'%m월 %d일') as day, DATE_FORMAT(createdat,'%p %h시 %i분') as time from document where workid=#{workid} and (line01=#{userid} or line02=#{userid} or line03=#{userid} 
+		or cc01=#{userid} or cc02=#{userid} or cc03=#{userid} or cc04=#{userid} or cc05=#{userid})
+	</select>
+	
+	<insert id="insertRow">
+		insert into document(docuseq,workid,sendername,senderid,line01,line02,line03,
+			cc01,cc02,cc03,cc04,cc05,linedepth,state,title,content,filepath,createdat,updatedat)
+		values(
+		(select ifnull(max(docuseq)+1,1) from document as document_alias),
+		#{workid},#{sendername},#{senderid},#{line01},#{line02},#{line03},
+		#{cc01},#{cc02},#{cc03},#{cc04},#{cc05},#{linedepth},#{state},#{title},#{content},#{filepath},sysdate(), sysdate())
+	</insert>
+	
+	<update id="updateRow">
+		update document set
+		workid = #{workid}, sendername = #{sendername}, senderid = #{senderid}, 
+		line01 = #{line01}, line02 = #{line02}, line03 = #{line03},
+		cc01 = #{cc01}, cc02 = #{cc02}, cc03 = #{cc03}, cc04 = #{cc04}, cc05 = #{cc05},
+		linedepth = #{linedepth}, state = #{state}, title = #{title}, content = #{content},
+		filepath = #{filepath}, updatedat = sysdate()
+		where docuseq = #{docuseq} 
+	</update>
+	
+	<delete id="deleteRow">
+		delete from document 
+		where docuseq = #{docuseq}
+	</delete>
+	
+	<select id="rollupFromMe" resultType="com.ee.hive.entities.DocumentRollUp">
+		select 0 as cnt_cc, sum( if(state='D', 1,0)) as cnt_d,
+		sum( if(state='W', 1,0)) as cnt_w, sum( if(state='1', 1,0)) as cnt_1,  
+		sum( if(state='2', 1,0)) as cnt_2, sum( if(state='3', 1,0)) as cnt_3,
+		sum( if(state='A', 1,0)) as cnt_a, sum( if(state='H', 1,0)) as cnt_h 
+		from document
+		where senderid = #{userid} and workid= #{workid}
+	</select>
+	
+	<select id="rollupToMe" resultType="com.ee.hive.entities.DocumentRollUp">
+		select sum( if(cc01=#{userid} or cc02=#{userid} or cc03=#{userid} or cc04=#{userid} or cc05=#{userid}, 1, 0)) as cnt_cc,
+		0 as cnt_d, 0 as cnt_d, sum( if(state='1', 1,0)) as cnt_1,  
+		sum( if(state='2', 1,0)) as cnt_2, sum( if(state='3', 1,0)) as cnt_3,
+		sum( if(state='A', 1,0)) as cnt_a, sum( if(state='H', 1,0)) as cnt_h 
+		from document 
+		where workid=#{workid} and state!='D' and state!='W' and (line01=#{userid} or line02=#{userid} or line03=#{userid} 
+		or cc01=#{userid} or cc02=#{userid} or cc03=#{userid} or cc04=#{userid} or cc05=#{userid})
+	</select>
+</mapper>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ee.hive.dao.WorkSpaceDao">
+	<select id="selectAll" resultType="com.ee.hive.entities.WorkSpace">
+		select * from workspace;
+	</select>
+	
+	<select id = "selectOne" resultType="com.ee.hive.entities.WorkSpace">
+		select * from workspace where workid = #{workid};
+	</select>
+	
+	<select id = "selectWorkspace" resultType="com.ee.hive.entities.WorkSpace">
+		select workspace.* from workspace 
+		join workmember on workspace.workid = workmember.workid 
+		where workmember.userid = #{userid} order by workspace.name;
+	</select>
+	
+	<select id = "selectWorkName" resultType="String">
+		select name from workspace where workid = #{workid}
+	</select>
+	
+	<insert id = "insertRow">
+		insert into workspace(workid, name, ownerid, createdat, updatedat) values(#{workid},#{name},#{ownerid}, sysdate(), sysdate());
+	</insert>
+	
+	<select id = "selectOwnerid" resultType="String">
+		select ownerid from workspace where workid = #{workid};
+	</select>
+	
+	<select id = "selectTableWork" resultType="com.ee.hive.entities.WorkSpace">
+		select w.*, u.email as owneremail from workspace w, user u where w.ownerid = u.userid and w.workid = #{workid};
+	</select>
+	
+	<update id="updateWorkspaceNameOwnerid">
+		update workspace set name = #{name}, ownerid = (select userid from user where email = #{owneremail}), updatedat = sysdate() where workid = #{workid}; 
+	</update>
+	
+	<update id="updateWorkOwnerid">
+		update workspace set ownerid = (select userid from workmember where workid=#{workid} order by createdat limit 1) where workid = #{workid};
+	</update>
+	
+	<delete id="deleteWork">
+		delete from workspace where workid = #{workid};
+	</delete>
+	
+	<select id="selectWorkNameId" resultType="com.ee.hive.entities.WorkSpace">
+		select w.workid, w.name from workspace w, workmember wm where w.workid = wm.workid and wm.userid = #{userid} limit 1;
+	</select>
+	
+	<select id="selectOwneremail" resultType="String">
+		select u.email from user u
+		join workspace w on u.userid = w.ownerid
+		where w.workid = #{workid};
+	</select>
+</mapper>

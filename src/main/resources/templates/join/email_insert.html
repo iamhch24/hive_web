@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<link rel="stylesheet" th:href="@{/css/semantic.css}">
+<link rel="stylesheet" th:href="@{/css/join.css}">
+<script th:src="@{/js/jquery-3.5.1.js}"></script>
+<body>
+	<form id="inseruserform" method="POST">
+		<div class="joinTop">
+			<img src="/images/hive_whitelogo.png" class="joinLogo">
+		</div>
+		<div class="join">
+			<div class="welcome">Welcome Hive!</div>
+			<div>
+				<span id="erroremail" style="color:red;display:none">존재하는 이메일입니다.</span>
+			</div>
+			<div>
+				<input type="email" class="checknull" name="email" id="email" placeholder="이메일을 입력하세요.">
+			</div>
+			<div>
+				<input type="text" name="name" id="name" placeholder="별명(이름)을 입력하세요.">
+			</div>
+			<div>
+				<input type="password" name="pwd" id="pwd" placeholder="비밀번호를 입력하세요.">
+			</div>
+			<div>
+				<input type="password" name="pwd2" id="pwd2" placeholder="비밀번호를 한번 더 입력하세요.">
+			</div>
+			<div>
+				<span id="errorpwd" style="color:red;display:none;margin-top:10px">비밀번호가 다릅니다.</span>
+			</div>
+			<div>
+				<span id="errorempty" style="color:red;display:none;margin-top:10px">모두 입력해주세요.</span>
+			</div>
+			<div>
+				<button type="button" id="checknull" onclick="insertuserajax()">이 이메일로 함께 하기</button>
+			</div>
+		</div>
+	</form>
+</body>
+<script th:src="@{/js/home.js}"></script>
+</html>

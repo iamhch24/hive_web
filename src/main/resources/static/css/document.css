@@ -1,0 +1,48 @@
+.ui.card {
+    width:20vw;
+}
+
+.ui.card.SW {
+    background-color: #A0A0A0; /*grey*/
+}
+.ui.card.S1 {
+    background-color: #FFD700; /*yellow*/
+}
+.ui.card.S2 {
+    background-color: #32CD32; /*olive*/
+}
+.ui.card.S3 {
+    background-color: #008080; /*teal*/
+}
+.ui.card.SA {
+    background-color: #FE9A76; /*orange*/
+}
+.ui.card.SH {
+    background-color: #B03060; /*red*/
+}
+.ui.card.CC {
+    background-color: #A0A0A0; /*grey*/
+}
+.ui.card.none {
+    display:none;
+}
+
+
+
+#docu-page {
+    width:70vw;
+    background-color: #43464b;
+    box-shadow: 0 1px 11px rgba(0, 0, 0, 0.27);    
+}
+
+#addDocu{
+    padding-top: 5px;
+    text-align: center;
+    line-height:30px;
+    font-size:18px;
+    color: #777;
+    position: absolute;
+    bottom: -10px;
+    height: 40px;
+    width:70vw;
+}

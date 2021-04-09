@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.ee.hive.dao.ChannelDao">
+	<select id="selectAll" resultType="com.ee.hive.entities.Channel">
+		select * from channel;
+	</select>
+	
+	<select id="selectChannel" resultType="com.ee.hive.entities.Channel">
+		select ch.* , (select u.email from user u join workspace w on w.ownerid = u.userid where w.workid = #{workid}) as owneremail
+		from channel ch 
+		join chanmember chm on ch.chanid = chm.chanid 
+		where ch.workid = #{workid} and chm.userid = #{userid}
+		order by ch.name;
+	</select>
+	
+	<select id="selectChannelID" resultType="String">
+		select ch.chanid from channel ch 
+		join chanmember chm on ch.chanid = chm.chanid 
+		where ch.workid = #{workid} and chm.userid = #{userid}
+		order by ch.name;
+	</select>
+	
+	<select id="selectOne" resultType="com.ee.hive.entities.Channel">
+		select * from channel where chanid = #{chanid};
+	</select>
+	
+	<select id="selectName" resultType="String">
+		select name from channel where chanid = #{chanid};
+	</select>
+	
+	<insert id="insertRow">
+		insert into channel(chanid, name, workid, createdat, updatedat) values(#{chanid},#{name},#{workid},sysdate(), sysdate());
+	</insert>
+	
+	<delete id="deleteChannel">
+		delete from channel where chanid = #{chanid};
+	</delete>
+	
+	<update id="updateNameDescription">
+		update channel set name = #{name}, description = #{description} where chanid = #{chanid};
+	</update>
+	
+	<select id="selectChanNameId" resultType="com.ee.hive.entities.Channel">
+		select ch.chanid, ch.name from channel ch, chanmember chm where ch.chanid = chm.chanid and ch.workid = #{workid} and chm.userid = #{userid} order by ch.name limit 1;
+	</select>
+	
+	<select id="selectCount" resultType="Integer">
+		select count(*) from channel where workid = #{workid};
+	</select>
+</mapper>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+				xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+				
+<head> 
+	<th:block th:replace="fragments/config :: configFragment"></th:block>
+</head>
+
+<body>
+	<div class="ui grid">
+		<div class="sixteen wide column" style="height: 64px">
+			<th:block th:replace="fragments/header :: headerFragment"></th:block>
+		</div>
+		<div class="one wide column one">
+			<th:block th:replace="fragments/workspacelist :: workFragment"></th:block>
+		</div>
+		<div class="two wide column two">
+			<th:block layout:fragment="list"></th:block>
+		</div>
+		<div class="thirteen wide column">
+			<th:block layout:fragment="activeListName"></th:block>
+			<th:block layout:fragment="content" class="contentLayout"></th:block>
+		</div>
+		<div class="sixteen wide column" style="margin-top:35px">
+			<th:block th:replace="fragments/footer :: footerFragment"></th:block>
+		</div>
+	</div>
+</body>
+<th:block layout:fragment="js"></th:block>
+</html>

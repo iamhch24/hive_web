@@ -1,0 +1,49 @@
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+				xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+				layout:decorator="layout/layout">
+
+<script>
+function enterkey() {
+    if (window.event.keyCode == 13) {
+    	findListformname.submit();
+    }
+}
+
+</script>
+<div th:fragment="headerFragment">
+    <div class="wrap">
+        <div class="menubar">
+            <div class="menuLogo">
+                <img src="/images/hive_whitelogo.png" onclick="location.href='/'" style="cursor:pointer;width:30px; height:30px">
+            </div>
+            <ul class="menuLeft">
+                <li>
+                    <a onclick="location.href='channel'"> 채널 </a>
+                </li>
+                <li>
+                    <a onclick="location.href='message'"> 메시지 </a>
+                </li>
+                <li>
+                    <a onclick="location.href='document'"> 결재 </a>
+                </li>  
+            </ul>
+            <ul class="menuRight">
+                <li>
+                    <a th:if="${session.sessionUserid != null}" th:text="${session.sessionUsername}"></a>
+                    <ul>
+                   	    <li><a onclick="updatemembermodal()">회원정보 수정</a></li>
+                        <li th:if="${session.sessionOwner} == 'Y'"><a onclick="updatechannelmodal()" th:value="${session.sessionChanid}" th:text="${session.sessionChanname} +' ' + 수정"></a></li>
+                        <li th:unless="${session.sessionOwner} == 'Y'"><a onclick="withdrawchannel()" th:value="${session.sessionChanid}" th:text="${session.sessionChanname} +' ' + 탈퇴"></a></li>    					
+                        <li><a onclick="location.href='logout'"> 로그아웃 </a></li>
+                    </ul>
+                </li>
+                <li>
+                	<a>H i v e </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    
+	
+</div>
+</html>

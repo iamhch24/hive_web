@@ -1,0 +1,29 @@
+<html lang="ko" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+	<th:block th:fragment="configFragment">
+        <!-- 이 영역에 공통으로 사용할 css, js library를 선언한다. -->
+        <link rel="preconnect" href="https://fonts.gstatic.com">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500&display=swap">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" integrity="sha512-8bHTC73gkZ7rZ7vpqUQThUDhqcNFyYi2xgDgPDHc+GXVGHXq+xPjynxIopALmOPqzo9JZj0k6OqqewdGO3EsrQ==" crossorigin="anonymous" />
+<!--         <link rel="stylesheet" th:href="@{/css/semantic.css}"> -->
+         <!--  <link rel="stylesheet" th:href="@{/css/semantic.min.css}" > -->
+        <link rel="stylesheet" th:href="@{/css/header.css}" >
+        <link rel="stylesheet" th:href="@{/css/workspace.css}" >
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js" integrity="sha512-dqw6X88iGgZlTsONxZK9ePmJEFrmHwpuMrsUChjAw1mRUhUITE5QU9pkcSox+ynfLhL15Sv2al5A0LVyDCmtUw==" crossorigin="anonymous"></script>        
+
+        <!--  <script th:src="@{/js/main.js}"></script> -->
+        <script th:src="@{/js/jquery-3.5.1.js}"></script>
+        <script th:src="@{/js/semantic.js}"></script>
+       	<script th:src="@{/js/workspace.js}"></script>
+        
+   <!--     Content Page의 CSS fragment 삽입-->
+        <th:block layout:fragment="head-css"></th:block>
+        
+   <!--      Content Page의 script fragment 삽입-->
+        <th:block layout:fragment="head-script"></th:block>
+	</th:block>
+	<th:block th:fragment="footerCss">
+		<link rel="stylesheet" th:href="@{/css/footer.css}">
+	</th:block>
+</html>

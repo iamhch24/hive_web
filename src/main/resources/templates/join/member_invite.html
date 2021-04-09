@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<link rel="stylesheet" th:href="@{/css/semantic.css}" >
+<link rel="stylesheet" th:href="@{/css/join.css}" >
+<script th:src="@{/js/jquery-3.5.1.js}"></script>
+<body>
+	<form action="inviteUser" method="POST">
+	<div class="joinTop">
+		 <img src="/images/hive_whitelogo.png" class="joinLogo">
+	</div>
+	<div class="join">
+		<div class="welcome">당신과 함께할 멤버들을 빠르게 모실게요!</div>
+		<div>
+			<input type="email" name="email" placeholder="초대할 멤버의 이메일을 입력하세요.">
+		</div>
+		<div>
+			<input type="email" name="email2" placeholder="초대할 멤버의 이메일을 입력하세요.">
+		</div>
+		<div>
+			<input type="email" name="email3" placeholder="초대할 멤버의 이메일을 입력하세요.">
+		</div>
+		
+		<button type="submit" class="channelSaveBtn">멤버 초대</button>
+		<button type="button" class="channelSaveBtn" onclick="location.href='channel'">나중에 하기</button>
+	</div>
+	</form>
+</body>
+</html>

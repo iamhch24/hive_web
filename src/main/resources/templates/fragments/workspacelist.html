@@ -1,0 +1,23 @@
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+				xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      			layout:decorator="layout/layout">
+
+<body>     			
+	<div th:fragment="workFragment">	
+		<form action = "choiceWork" method="POST">
+			<div class="ui form">
+				<div class="field" th:each="item : ${workspaces}">
+					<button type="submit" th:if="${session.sessionEmail} == ${item.owneremail}" class="worklistBtn" th:classappend="${session.sessionWorkid==item.workid} ? 'selected' : ''" th:text="${item.title}" onmouseup="updateworkspacemodal(this.value)"
+						th:value="${item.workid}" name="workid"></button>
+					<button type="submit" th:unless="${session.sessionEmail} == ${item.owneremail}" class="worklistBtn ownerN" th:classappend="${session.sessionWorkid==item.workid} ? 'selected' : ''" th:text="${item.title}" onmouseup="popupcontextmenu(this.value)"
+						th:value="${item.workid}" name="workid"></button>
+				</div>
+				<button type="button" data-tooltip="워크스페이스 추가" data-position="right center" class="worklistBtn" onclick="location.href='appendWorkspace'">+</button>
+			</div>
+		</form>
+		<ul class="contextmenu">
+			<li><a href="#" style="text-align:center" onclick="withdrawworkspace()">탈 퇴</a></li>
+		</ul>
+	</div>
+</body>
+</html>

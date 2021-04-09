@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ee.hive.dao.UserDao">
+	<select id="selectAll" resultType="com.ee.hive.entities.User">
+		select * from user;
+	</select>
+	
+	<select id="selectOne" resultType="com.ee.hive.entities.User">
+		select userid,email,name,phone,job,photo,lastwork,lastchannel,createdat,updatedat,lastmsgroom from user where userid = #{userid};
+	</select>
+	
+	<select id="selectEmail" resultType="com.ee.hive.entities.User">
+		select * from user where email = #{email};
+	</select>
+	
+	<update id="updateLastWork">
+		update user set lastwork = #{workid} where userid = #{userid};
+	</update>
+	
+	<update id="updateLastMsgRoom">
+		update user set lastmsgroom = #{roomseq} where userid = #{userid};
+	</update>
+	
+	<update id="updateLastChannel">
+		update user set lastchannel = #{chanid} where userid = #{userid};
+	</update>
+	
+	<select id="selectLastWork" resultType = "String">
+		select lastwork from user where userid = #{userid};
+	</select>
+	
+	<select id="selectLastChannel" resultType = "String">
+		select lastchannel from user where userid = #{userid};
+	</select>
+	
+	<select id="selectLastMsgRoom" resultType = "String">
+		select lastmsgroom from user where userid = #{userid};
+	</select>
+	
+	<insert id="insertRow">
+		insert into user(userid, email, name, pwd, createdat) values(#{userid}, #{email}, #{name}, #{pwd}, sysdate());
+	</insert>
+	
+	<select id="selectIdName" resultType="com.ee.hive.entities.User">
+		select user.userid, user.name from user
+		join workmember on user.userid = workmember.userid
+		where workmember.workid = #{workid};
+	</select>
+	
+	<select id="selectWorkMember" resultType="com.ee.hive.entities.User">
+		select user.userid, user.email, user.name, user.phone, user.job, user.photo, user.createdat from user 
+		join workmember on workmember.userid = user.userid
+		where workmember.workid = #{workid} and user.userid != #{userid};
+	</select>
+	
+	<select id="selectMemberIDNamePhoto" resultType="com.ee.hive.entities.User">
+		select user.userid, user.name, user.photo from user 
+		join workmember on workmember.userid = user.userid
+		where workmember.workid = #{workid} order by user.name;
+	</select>
+	
+	<update id="updateUser">
+		update user set name = #{name}, phone=#{phone}, job = #{job}, updatedat = sysdate() where userid = #{userid};
+	</update>
+	
+	<update id="updatePwd">
+		update user set pwd = #{pwd} where userid = #{userid};
+	</update>
+	
+	<select id="selectPwd" resultType = "String">
+		select pwd from user where userid = #{userid};
+	</select>
+	
+	<update id="updateAvata">
+		update user set photo = #{avata} where userid = #{userid};
+	</update>
+	
+	<select id="selectId" resultType = "String">
+		select userid from user where email = #{email}
+	</select>
+	
+	<select id="selectMsgUser" resultType = "com.ee.hive.entities.User">
+		select * from user where userid != #{userid} and userid not in (select userid from msgroom where workid = #{workid} and (userid = #{userid} or otherid = #{userid})) and userid not in (select otherid from msgroom where workid = #{workid} and (userid = #{userid} or otherid =#{userid}));
+	</select>
+</mapper>

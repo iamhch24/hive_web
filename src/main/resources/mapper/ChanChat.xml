@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ee.hive.dao.ChanChatDao">
+	<select id="selectAll" resultType="com.ee.hive.entities.ChanChat">
+		select * from chanchat;
+	</select>
+	
+	<select id="selectMessage" resultType="com.ee.hive.entities.ChanChat">
+		select *, (select photo from user where userid=A.senderid) as senderavata, DATE_FORMAT(createdat,'%m월 %d일') as day, DATE_FORMAT(createdat,'%p %h시 %i분') as time from chanchat A where chanid = #{chanid};
+	</select>
+	
+	<insert id="insertRow">
+		insert into chanchat(chatseq, chanid, sendername, senderid, content, createdat, updatedat)
+		values(
+		(select ifnull(max(chatseq)+1,1) from chanchat as chanchat_alias),
+		#{chanid},#{sendername},#{senderid},#{content}, sysdate(), sysdate());
+	</insert>
+</mapper>

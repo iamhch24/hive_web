@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ee.hive.dao.MsgRoomDao">
+	<select id="selectAll" resultType="com.ee.hive.entities.MsgRoom">
+		select * from msgroom;
+	</select>
+	
+	<select id="selectList" resultType="com.ee.hive.entities.MsgRoom">
+		select * from msgroom
+		where (userid = #{userid} or otherid = #{userid}) and workid = #{workid} order by createdat;
+	</select>
+	
+	<select id="selectRoom" resultType="com.ee.hive.entities.MsgRoom">
+		select * from msgroom where userid = #{userid} or otherid = #{userid};
+	</select>
+	
+	<select id="selectRoomID" resultType="String">
+		select mr.seq from msgroom mr
+		join workspace ws on mr.workid = ws.workid
+		where (mr.workid = #{workid}) and (mr.userid = #{userid} or mr.otherid = #{userid}); 
+	</select>
+	
+	<select id="selectmsgroom" resultType="com.ee.hive.entities.MsgRoom">
+		select * from msgroom where seq = #{roomseq};
+	</select>
+	
+	<insert id="insertRow">
+		insert into msgroom(seq, workid, userid, otherid, createdat) 
+		values(
+		(SELECT ifnull(Max(seq)+1, 1) from msgroom msgroom_alias),
+		#{workid}, #{userid}, #{otherid}, sysdate())
+	</insert>
+	
+	<select id ="selectOne" resultType="com.ee.hive.entities.MsgRoom">
+		select * from msgroom where seq = #{roomseq};
+	</select>
+	
+	<insert id ="insertWorkidUseridEmail">
+		insert into msgroom(seq, workid,userid, otherid, createdat)
+		values(
+		(SELECT ifnull(Max(seq)+1, 1) from msgroom msgroom_alias),
+		#{workid}, #{userid}, (select userid from user where eamil = #{inviteemail}), sysdate());
+	</insert>
+	
+	<insert id ="insertmul">
+		insert into msgroom(seq, workid,userid, otherid, createdat)
+		values(
+		(SELECT ifnull(Max(seq)+1, 1) from msgroom msgroom_alias),
+		#{workid}, #{memberid}, (select userid from user where email=#{inviteemail}), sysdate());
+	</insert>
+	
+	<delete id="deleteRoom">
+		delete from msgroom where (userid=#{userid} or otherid=#{userid}) and workid=#{workid};
+	</delete>
+</mapper>

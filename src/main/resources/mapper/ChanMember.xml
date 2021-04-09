@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ee.hive.dao.ChanMemberDao">
+	<select id="selectAll" resultType="com.ee.hive.entities.ChanMember">
+		select * from chanmember;
+	</select>
+	
+	<select id="selectOne" resultType="com.ee.hive.entities.ChanMember">
+		select * from chanmember where userid = #{userid};
+	</select>
+	
+	<insert id = "insertRow">
+		insert into chanmember(seq, chanid, userid, createdat, updatedat) 
+		values((SELECT ifnull(Max(seq)+1, 1) from chanmember chanmember_alias),#{chanid},#{userid},sysdate(),sysdate())
+	</insert>
+	
+	<insert id = "appendChanMember">
+		insert into chanmember(seq,chanid,userid,createdat,updatedat)
+		values(
+		(SELECT ifnull(Max(seq)+1, 1) from chanmember chanmember_alias),
+		#{chanid}, #{userid}, sysdate(), sysdate());
+	</insert>
+	
+	<select id="selectMember" resultType="com.ee.hive.entities.ChanMember">
+		select * from chanmember where chanid = #{chanid} and userid = (select userid from user where email = #{inviteemail});
+	</select>
+	
+	<insert id = "inviteMember">
+		insert into chanmember(seq, chanid, userid, createdat, updatedat) 
+		values(
+		(SELECT ifnull(Max(seq)+1, 1) from chanmember chanmember_alias),
+		#{chanid}, (select userid from user where email = #{inviteemail}), sysdate(), sysdate())
+	</insert>
+	
+	<select id = "selectChanid" resultType="String">
+		select chm.chanid from channel ch, chanmember chm 
+		where ch.chanid = chm.chanid and ch.workid = #{workid} and chm.userid = #{userid}
+		order by ch.name limit 1;
+	</select>
+	
+	<delete id ="deleteMember">
+		delete from chanmember where chanid = #{chanid} and userid = #{userid};
+	</delete>
+	
+	<select id = "selectCount" resultType="Integer">
+		select count(*) from chanmember chm
+		join channel ch on chm.chanid = ch.chanid
+		where ch.workid = #{workid} and chm.userid = #{userid};
+	</select>
+	
+	
+</mapper>

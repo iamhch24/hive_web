@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorator="layout/layout">
+
+<!-- 목록 -->
+<th:block layout:fragment="head-css">
+	<link rel="stylesheet" th:href="@{/css/document.css}">
+</th:block>
+
+<div layout:fragment="list">
+	<div id="docu-list" class="display">
+		<div onclick="location.href='/document'" class="display"
+			style="cursor: pointer">
+			<i class="copy icon"></i>결재 : 상신함
+		</div>
+		<div onclick="location.href='/document?cmd=ToMe'" class="display"
+			style="cursor: pointer; margin-top: 10px">
+			<i class="archive icon"></i>결재 : 수신함
+		</div>
+	</div>
+</div>
+
+<div layout:fragment="activeListName" class="activeListName docu">
+	<div th:text="${cmd=='ToMe'}?'결재 : 수신함':'결재 : 상신함'">결재 : 상신함</div>
+	<th:block th:if="${cmd!='ToMe'}">
+	<div class="ui steps">
+		<div class="active step">
+			<i class="pencil alternate icon"></i>
+			<div class="content">
+				<div class="title">D 초안, W 철회</div>
+				<div class="description">총 [[${docurollup.cnt_d+docurollup.cnt_w}]] : D(<span style="color:red">[[${docurollup.cnt_d}]]</span>), W(<span style="color:red">[[${docurollup.cnt_w}]]</span>)</div>
+			</div>
+		</div>
+		<div class="active step">
+			<i class="suitcase icon"></i>
+			<div class="content">
+				<div class="title">1/2/3 결재진행</div>
+				<div class="description">총 [[${docurollup.cnt_1+docurollup.cnt_2+docurollup.cnt_3}]] : 1(<span style="color:red">[[${docurollup.cnt_1}]]</span>) / 2(<span style="color:red">[[${docurollup.cnt_2}]]</span>) / 3(<span style="color:red">[[${docurollup.cnt_3}]]</span>)</div>
+			</div>
+		</div>
+		<div class="active step">
+			<i class="coffee icon"></i>
+			<div class="content">
+				<div class="title">A 승인완료</div>
+				<div class="description">A (<span style="color:red">[[${docurollup.cnt_a}]]</span>)  </div>
+			</div>
+		</div>
+		<div class="disabled  step">
+			<i class="hold icon"></i>
+			<div class="content">
+				<div class="title">H 승인보류</div>
+				<div class="description">H (<span style="color:red">[[${docurollup.cnt_h}]]</span>)  </div>
+			</div>
+		</div>
+	</div>
+	</th:block>
+	<th:block th:if="${cmd=='ToMe'}">
+	<div class="ui steps">
+		<div class="active step">
+			<i class="pencil alternate icon"></i>
+			<div class="content">
+				<div class="title">CC 참조</div>
+				<div class="description">CC (<span style="color:red">[[${docurollup.cnt_cc}]]</span>)</div>
+			</div>
+		</div>
+		<div class="active step">
+			<i class="suitcase icon"></i>
+			<div class="content">
+				<div class="title">1/2/3 결재진행</div>
+				<div class="description">총 [[${docurollup.cnt_1+docurollup.cnt_2+docurollup.cnt_3}]] : 1(<span style="color:red">[[${docurollup.cnt_1}]]</span>) / 2(<span style="color:red">[[${docurollup.cnt_2}]]</span>) / 3(<span style="color:red">[[${docurollup.cnt_3}]]</span>)</div>
+			</div>
+		</div>
+		<div class="active step">
+			<i class="coffee icon"></i>
+			<div class="content">
+				<div class="title">A 승인완료</div>
+				<div class="description">A (<span style="color:red">[[${docurollup.cnt_a}]]</span>)  </div>
+			</div>
+		</div>
+		<div class="disabled  step">
+			<i class="hold icon"></i>
+			<div class="content">
+				<div class="title">H 승인보류</div>
+				<div class="description">H (<span style="color:red">[[${docurollup.cnt_h}]]</span>)  </div>
+			</div>
+		</div>
+	</div>
+	</th:block>	
+</div>
+
+<!-- 채널 내용 -->
+<div layout:fragment="content">
+	<div id="docu-page">
+		<div class="docu-container">
+			
+			<div class="ui list" id="documentArea">
+				<th:block th:each="docu, num: ${documents}">
+					<th:block th:unless="${num.index}>0 and ${documents[num.index - 1].day == documents[num.index].day}">
+						<div class="header-day" style="margin:2px 10px;text-align:center;color:white;background-color:#23272a;border-radius:10px;">[[${(docu.day==today_mmdd)?'오늘':docu.day}]]</div>
+					</th:block>										
+<!-- 결재 상신함 처리 -->				
+					<th:block th:if="${cmd!='ToMe'}">
+					<div class="item chlist" th:data-item="${docu}" th:with="ds=${docu.state}">
+					
+						<div class="ui card" th:classappend="${ds=='1' or ds=='2' or ds=='3'?'S'+ds+' centered':ds=='A' or ds=='H'?'S'+ds+' right floated':'S'+ds}">
+							<div class="content">
+								<div class="center aligned header">[[${docu.title}]]</div>
+								<div class="left aligned description" style="padding-left:50px">결재라인
+									<th:block th:each="member : ${members}" th:text="${member.userid==docu.line01}?' :: '+${member.name}:''"></th:block>
+									<th:block th:each="member : ${members}" th:text="${member.userid==docu.line02}?' > '+${member.name}:''"></th:block>
+									<th:block th:each="member : ${members}" th:text="${member.userid==docu.line03}?' > '+${member.name}:''"></th:block>
+									<br>
+									서류상태 :: [[${docu.state=='D'?'초안':docu.state=='W'?'철회':docu.state=='1'?'1단계대기':docu.state=='2'?'2단계대기':docu.state=='3'?'3단계대기':docu.state=='A'?'승인완료':docu.state=='H'?'승인보류':''}]]
+								</div>
+							</div>
+							<div class="extra content">
+								<div class="center aligned author">
+									<img class="ui avatar image" th:src="${session.sessionAvata}">	[[${docu.sendername}]] [[${docu.time}]]
+								</div>
+							</div>
+						</div>
+					</div>
+					</th:block>
+<!-- 결재 수신함 처리 -->					
+					<th:block th:if="${cmd=='ToMe'}">
+					<div class="item chlist" th:data-item="${docu}" th:with="ds=${docu.state},c1=${docu.cc01},c2=${docu.cc02},c3=${docu.cc03},c4=${docu.cc04},c5=${docu.cc05},uid=${session.sessionUserid}">
+					
+						<div class="ui card" th:classappend="${ds=='D' or ds=='W'?'none':c1==uid or c2==uid or c3==uid or c4==uid or c5==uid?'CC':ds=='A' or ds=='H'?'S'+ds+' right floated':ds=='1' or ds=='2' or ds=='3'?'S'+ds+' centered':'none'}">
+							<div class="content">
+								<div class="center aligned header">[[${docu.title}]]</div>
+								<div class="left aligned description" style="padding-left:50px">결재라인
+									<th:block th:each="member : ${members}" th:text="${member.userid==docu.line01}?' :: '+${member.name}:''"></th:block>
+									<th:block th:each="member : ${members}" th:text="${member.userid==docu.line02}?' > '+${member.name}:''"></th:block>
+									<th:block th:each="member : ${members}" th:text="${member.userid==docu.line03}?' > '+${member.name}:''"></th:block>
+									<br>
+									서류상태 :: [[${docu.state=='D'?'초안':docu.state=='W'?'철회':docu.state=='1'?'1단계대기':docu.state=='2'?'2단계대기':docu.state=='3'?'3단계대기':docu.state=='A'?'승인완료':docu.state=='H'?'승인보류':''}]]
+								</div>
+							</div>
+							<div class="extra content">
+								<div class="center aligned author">
+									<img class="ui avatar image" th:src="${session.sessionAvata}">	[[${docu.sendername}]] [[${docu.time}]]
+								</div>
+							</div>
+						</div>
+					</div>
+					</th:block>
+					
+				</th:block>
+			</div>
+		</div>
+	</div>
+	
+<!-- 수신함인 경우 + 기능을 보여주지 않는다 -->	
+	<th:block th:if="${cmd!='ToMe'}">
+		<div class="ui bottom attached button" id="addDocu">
+			<i class="add icon"></i> Add Document
+		</div>
+	</th:block>
+	
+<!-- document 모달창 div   -->
+	<div class="ui modal docu" id="documentForm">
+		<i class="close icon"></i>
+		<div class="header">Document Form</div>
+		<form class="ui form" method="post" action="saveDocument" id="docuForm" enctype="multipart/form-data"
+			style="width: 90%; margin: 0 auto;">
+			
+			<div class="image content">
+				<input type="hidden" name="mode" id="modal_mode">
+				<input type="hidden" name="cmd" id="modal_cmd" th:value="${cmd}">
+				<input type="hidden" name="docuseq" id="modal_docuseq">
+				<input type="hidden" name="workid" th:value="${session.sessionWorkid}" id="modal_workid"> 
+				<input type="hidden" name="sendername" th:value="${session.sessionUsername}" id="modal_sendername"> 
+				<input type="hidden" name="senderid" th:value="${session.sessionUserid}" id="modal_senderid">
+				<input type="hidden" name="linedepth" id="modal_linedepth">
+				<input type="hidden" name="state" id="modal_state">
+				<input type="hidden" name="filepath" id="modal_filepath">
+				<div class="five fields">
+					<div class="field">
+						<div class="ui teal message" style="height:100%;text-align:center">결재라인<br>단계</div>
+					</div>
+					<div class="field">
+						<label>1단계</label> <select name="line01" id="modal_line01">
+							<option value="">----</option>
+							<option th:each="member : ${members}" th:value="${member.userid}"
+								th:text="${member.name}"></option>
+						</select>
+					</div>
+					<div class="field">
+						<label>2단계</label> <select name="line02" id="modal_line02">
+							<option value="">----</option>
+							<option th:each="member : ${members}" th:value="${member.userid}"
+								th:text="${member.name}"></option>
+						</select>
+					</div>
+					<div class="field">
+						<label>3단계</label> <select name="line03" id="modal_line03">
+							<option value="">----</option>
+							<option th:each="member : ${members}" th:value="${member.userid}"
+								th:text="${member.name}"></option>
+						</select>
+					</div>
+					<div class="field">
+						<div class="ui orange message" style="height:100%;text-align:center">
+						<label>서류상태</label><br><label id="modal_statetext"></label>
+						</div>
+					</div>
+				</div>
+				<div class="six fields">
+					<div class="field">
+						<div class="ui teal message"  style="height:100%;text-align:center">CC 참조</div>
+					</div>
+					<div class="field">
+						<select name="cc01" id="modal_cc01">
+							<option value=""></option>
+							<option th:each="member : ${members}" th:value="${member.userid}"
+								th:text="${member.name}"></option>
+						</select>
+					</div>
+					<div class="field">
+						<select name="cc02" id="modal_cc02">
+							<option value=""></option>
+							<option th:each="member : ${members}" th:value="${member.userid}"
+								th:text="${member.name}"></option>
+						</select>
+					</div>
+					<div class="field">
+						<select name="cc03" id="modal_cc03">
+							<option value=""></option>
+							<option th:each="member : ${members}" th:value="${member.userid}"
+								th:text="${member.name}"></option>
+						</select>
+					</div>
+					<div class="field">
+						<select name="cc04" id="modal_cc04">
+							<option value=""></option>
+							<option th:each="member : ${members}" th:value="${member.userid}"
+								th:text="${member.name}"></option>
+						</select>
+					</div>
+					<div class="field">
+						<select name="cc05" id="modal_cc05">
+							<option value=""></option>
+							<option th:each="member : ${members}" th:value="${member.userid}"
+								th:text="${member.name}"></option>
+						</select>
+					</div>
+				</div>
+				<div class="six fields">
+					<div class="field">
+						<div class="ui blue message" style="height:100%;text-align:center">서류 제목</div>
+					</div>
+					<div class="fourteen wide field">
+						<div class="ui input">
+							<input placeholder="제목을 입력해 주세요" type="text" name="title" id="modal_title">
+						</div>
+					</div>
+				</div>
+				<div class="six fields">
+					<div class="field">
+						<div class="ui blue message" style="height:100%;text-align:center">첨부 화일</div>
+					</div>
+					<div class="fourteen wide field">
+						<span class="ui action input">
+							<button class="ui button" id="attachbtn" type="button">File</button>
+							<input type="file" id="b_attach" name="b_attachfile"
+							style="display: none"> <input type="text"
+							placeholder="첨부화일을 선택해 주세요" name="b_attachname" id="b_attachname" style="margin:0 5px">
+							<a href="#" id="modal_downloadfile"><i class="arrow alternate circle down outline icon"
+								style="font-size: 40px;line-height:40px"></i></a>
+						</span>
+					</div>
+				</div>
+				<div class="field">
+					<textarea name="content" id="modal_content" class="ui input"></textarea>
+				</div>
+			</div>
+			
+		</form>
+		<div class="actions">
+			<button class="ui black deny button" onclick="resetDocument()" id="modal_btn01" >취소</button>
+			<button class="ui blue deny button" onclick="saveDocument()" id="modal_btn02">임시저장</button>
+			<button class="ui positive right labeled icon button" onclick="submitDocument()" id="modal_btn03">
+				결재 상신 <i class="checkmark icon"></i>
+			</button>
+			<div class="ui flowing popup hidden" id="poptarget" >
+				<p style="text-align:left;color:red">삭제하면 복구가 안됩니다.<br>삭제하시려면 삭제버튼을 클릭해 주세요</p>
+   			</div>
+   		</div>
+	</div>
+	
+</div>
+
+<th:block layout:fragment="js">
+<script	src="https://cdn.tiny.cloud/1/mesfz95lh1x09d0y86fob0stspry4hg7jzw58ei5g6gdv2i4/tinymce/5/tinymce.min.js"
+		referrerpolicy="origin"></script>
+	<script>
+tinymce.init({
+	selector: 'textarea',
+	menubar: false,
+  	plugins: [
+    'advlist autolink lists link image charmap print preview anchor',
+    'searchreplace visualblocks code fullscreen',
+    'insertdatetime media table paste code help wordcount'
+  ],
+	toolbar: 'undo redo | formatselect | ' +
+  'bold italic forecolor backcolor | alignleft aligncenter ' +
+  'alignright alignjustify | bullist numlist outdent indent | ' +
+  'formatpainter removeformat | help',
+  	content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+  	width: '100%',
+	branding: false,
+});
+
+</script>
+
+<script th:inline="javascript">
+	var command = /*[[${cmd}]]*/null;
+	var	members = /*[[${members}]]*/null;	
+	var userid = /*[[${session.sessionUserid}]]*/null;
+	var docurollups = /*[[${docurollups}]]*/null;
+	var contentLayout = document.querySelector('.contentLayout');
+	contentLayout.scrollTop = contentLayout.scrollHeight;
+</script>
+<script>
+$("#documentForm").modal({
+	closable: false,
+   	detachable: false,
+    allowMultiple: true,   	
+    onDeny: function () { },
+    onApprove: function() { }
+});
+
+$('#addDocu').on('click',function(){
+	var form = document.getElementById('docuForm');
+	form.reset();
+	$('#modal_mode').val("add");
+	$('#modal_statetext').text("<초안>");
+	$('#modal_btn01').attr('onclick','resetDocument()');
+	$('#modal_btn01').text("취소");
+	$('#modal_btn01').popup({});
+	$('#modal_btn01').show();
+	$('#modal_btn02').show();
+	$('#modal_btn03').show();
+	$('#documentForm').modal('show');
+});
+
+$('.item.chlist').on('dblclick',function(){
+	var docu = $(this).attr('data-item');
+	var docu2 = parseDocu(docu);
+	$('#modal_docuseq').val(docu2.docuseq);
+	$('#modal_workid').val(docu2.workid);
+	$('#modal_sendername').val(docu2.sendername);
+	$('#modal_senderid').val(docu2.senderid);
+	$('#modal_linedepth').val(docu2.linedepth);
+	$('#modal_state').val(docu2.state);
+	$('#modal_line01').val(docu2.line01);
+	$('#modal_line02').val(docu2.line02);
+	$('#modal_line03').val(docu2.line03);
+	$('#modal_cc01').val(docu2.cc01);
+	$('#modal_cc02').val(docu2.cc02);
+	$('#modal_cc03').val(docu2.cc03);
+	$('#modal_cc04').val(docu2.cc04);
+	$('#modal_cc05').val(docu2.cc05);
+	$('#modal_title').val(docu2.title);
+	$('#b_attachname').val(docu2.filepath);
+	$('#modal_filepath').val(docu2.filepath);
+	
+	if(docu2.filepath)
+		$('#modal_downloadfile').attr('href',`/fileDownload?b_attach=${docu2.filepath}`);
+	else
+		$('#modal_downloadfile').attr('href','#');
+		
+	tinyMCE.get('modal_content').setContent(docu2.content);
+	$('#modal_mode').val("update");
+	
+	switch(docu2.state){
+		case 'D':
+			$('#modal_statetext').text("<초안>");
+			break;
+		case 'W':
+			$('#modal_statetext').text("<철회상태>");
+			break;
+		case '1':
+			$('#modal_statetext').text("<1단계 대기>");
+			break;
+		case '2':
+			$('#modal_statetext').text("<2단계 대기>");
+			break;	
+		case '3':
+			$('#modal_statetext').text("<3단계 대기>");
+			break;
+		case 'A':
+			$('#modal_statetext').text("<승인 완료>");
+			break;	
+		case 'H':
+			$('#modal_statetext').text("<승인 보류>");
+			break;	
+	}
+	
+	if(command !== "ToMe"){
+		if (docu2.state==='D' || docu2.state==='W') {
+			$('#modal_btn01').attr('onclick','deleteDocument()');
+			$('#modal_btn01').text("삭제");
+			$('#modal_btn01').popup({  inline: true, popup: '#poptarget'});
+			$('#modal_btn01').show();
+			$('#modal_btn02').show();
+			$('#modal_btn03').show();
+		} else if (docu2.state==='1' || docu2.state==='2' || docu2.state==='3') {
+			$('#documentForm input').prop('readonly', true);
+			tinyMCE.get('modal_content').setMode('readonly');
+			$('#documentForm option').attr('disabled', true);
+		
+			$('#modal_btn01').attr('onclick','withdawDocument()');
+			$('#modal_btn01').text("상신 철회");
+			$('#modal_btn01').show();
+			$('#modal_btn02').hide();
+			$('#modal_btn03').hide();
+		} else {
+			$('#documentForm input').prop('readonly', true);
+			tinyMCE.get('modal_content').setMode('readonly');	
+			$('#documentForm option').attr('disabled', true);
+		
+			$('#modal_btn01').hide();
+			$('#modal_btn02').hide();
+			$('#modal_btn03').hide();		
+		}
+	}
+	else{
+		$('#documentForm input').prop('readonly', true);
+		tinyMCE.get('modal_content').setMode('readonly');
+		$('#documentForm option').attr('disabled', true);
+
+		if (docu2.cc01===userid || docu2.cc02===userid || docu2.cc03===userid || docu2.cc04===userid || docu2.cc05===userid) {
+			$('#modal_btn01').hide();
+			$('#modal_btn02').hide();
+			$('#modal_btn03').hide();				
+		} else if ((docu2.state==='1' && userid===docu2.line01)||(docu2.state==='2' && userid===docu2.line02)||(docu2.state==='3' && userid===docu2.line03)) {
+			$('#modal_btn01').attr('onclick','holdDocument()');
+			$('#modal_btn01').text("승인보류");
+			$('#modal_btn01').show();
+			$('#modal_btn02').hide();
+			$('#modal_btn03').attr('onclick','approveDocument()');
+			$('#modal_btn03').text("승인");
+			$('#modal_btn03').show();
+		} else {
+			$('#modal_btn01').hide();
+			$('#modal_btn02').hide();
+			$('#modal_btn03').hide();		
+		}	
+	}
+	$('#documentForm').modal('show');
+//	location.href=`/fileDownload?b_attach=${docu2.filepath}`;
+});
+
+function parseDocu(docu){
+	console.log(docu);
+	var str = docu.replace("Document(","");
+	str = str.replace(/(\r\n\t|\n|\r\t)/gm,"");
+	str = str.substr(0,str.length-1);
+	var str2 = str.split(',');
+	var jsonstr = "{";
+    for ( var i in str2 ) {
+    	var item = str2[i].split('=');
+    	var id = item[0].trim();
+    	var value = item[1].trim();
+    	if(value!=="null")
+    		jsonstr += `"${id}":"${value}",`;
+    	else
+    		jsonstr += `"${id}":null,`;
+    }
+    jsonstr = jsonstr.substr(0,jsonstr.length-1);
+	jsonstr += "}";
+	var docu2=JSON.parse(jsonstr);	
+	console.log(docu2);
+	return docu2; 
+}
+
+function get_linedepth(){
+	var line01 = $('#modal_line01').val();
+	var line02 = $('#modal_line02').val();
+	var line03 = $('#modal_line03').val();
+	var linedepth = 1;
+	
+	if (line01===null || line01==="") { 
+		alert("1단계 결재 수신자를 지정하시기 바랍니다.");
+		return;
+	}
+	linedepth = (line03!==null && line03!=="") ? 3 : 2;	
+	linedepth = (line02!==null && line02!=="") ? 2 : 1;
+
+	return linedepth;
+}
+
+function saveDocument () {
+	var form = document.getElementById('docuForm');
+	var linedepth = get_linedepth();
+	$('#modal_state').val('D');
+	$('#modal_linedepth').val(linedepth);
+	form.submit();
+}
+
+function submitDocument () {
+	var form = document.getElementById('docuForm');
+	var linedepth = get_linedepth();
+	$('#modal_state').val('1');
+	$('#modal_linedepth').val(linedepth);
+	form.submit();
+}
+
+function withdawDocument () {
+	var form = document.getElementById('docuForm');
+	$('#modal_state').val('W');
+	$('#documentForm option').attr('disabled', false);
+	form.submit();
+}
+
+function deleteDocument () {
+	var docuseq = $('#modal_docuseq').val();
+	location.href=`/deleteDocument?seq=${docuseq}`;
+}
+
+function resetDocument () {
+	var form = document.getElementById('docuForm');
+	form.reset();
+}
+
+function approveDocument() {
+	var form = document.getElementById('docuForm');
+	var line01 = $('#modal_line01').val();
+	var line02 = $('#modal_line02').val();
+	var line03 = $('#modal_line03').val();
+	var linedepth = $('#modal_linedepth').val();
+	var state = $('#modal_state').val();
+	
+	if(userid === line01){
+		if (state == linedepth)
+			$('#modal_state').val('A');
+		else
+			$('#modal_state').val('2');
+	} else if (userid === line02) {
+		if (state == linedepth)
+			$('#modal_state').val('A');
+		else
+			$('#modal_state').val('3');
+	} else if (userid === line03) {
+		if (state == linedepth)
+			$('#modal_state').val('A');
+	}
+	$('#documentForm option').attr('disabled', false);	
+	form.submit();
+}
+
+function holdDocument() {
+	var form = document.getElementById('docuForm');
+	$('#modal_state').val('H');
+	$('#documentForm option').attr('disabled', false);	
+	form.submit();
+}
+
+$('#attachbtn').on('click', function() {
+	$('#b_attach').click();
+	$('#b_attach').on('change', function() {
+		let filename = $('#b_attach').val();
+		$('#b_attachname').val(filename);
+	});
+});
+
+	
+</script>
+</th:block>
+
+</html>

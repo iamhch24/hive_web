@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorator="layout/layout">
+
+<!-- 채널 목록 -->
+<div layout:fragment="list">
+	<div id="channel-list" class="display">
+		<div class="ui accordion ">
+			<div class="active title ">
+				<span class="display"><i class="dropdown icon"></i> 채 널</span>
+			</div>
+			<ul class="active content" id="channel-names">
+				<th:block th:each="channel: ${channels}">
+					<a th:href="@{choiceChannel?chanid=} + ${channel.chanid}">
+						<li class="chlist" th:attr="data-tooltip=${channel.description}" data-position="right center"># [[${channel.name}]] 
+						<label class="ui teal circular label" style="float: right; opacity: 0"
+							th:data-id="${channel.chanid}"></label>
+						</li>
+					</a>
+				</th:block>
+			</ul>
+		</div>
+		<span th:if="${session.sessionOwner}=='Y'"
+			onclick="appendchannelmodal()" class="display"
+			style="cursor: pointer"><i class="plus icon"></i>채널 추가</span>
+	</div>
+</div>
+
+<!-- 활성화된 채널 이름 -->
+<div layout:fragment="activeListName" class="activeListName">
+	<span th:text="${channelname}"></span>
+</div>
+
+<!-- 채널 내용 -->
+<div layout:fragment="content">
+	<div id="chat-page">
+		<div class="chat-container">
+			<div class="ui list" id="messageArea">
+				<th:block th:each="chanchat, num: ${chanchats}">
+					<th:block
+						th:unless="${num.index}>0 and ${chanchats[num.index - 1].day == chanchats[num.index].day}">
+						<div class="header-day"
+							style="text-align: center; background-color: #23272a; border-radius: 10px">[[${(chanchat.day==today_mmdd)?'오늘':chanchat.day}]]</div>
+					</th:block>
+					<div class="item chlist"
+						th:classappend="${session.sessionUserid==chanchat.senderid} ? 'right' : ''">
+						<img class="ui avatar image"
+							th:classappend="${session.sessionUserid==chanchat.senderid} ? 'right floated' : ''"
+							th:src="${chanchat.senderavata}"
+							style="color: white; background: gray; text-align: center; border-radius: 20%; width: 50px; height: 50px;">
+						<!-- 		    		<i class="user icon" style="color:white;background:gray;text-align:center;border-radius:20%;font-size:40px;line-height:1.4;padding:0 10px"></i> -->
+						<div class="content">
+							<div class="header"
+								style="color: white; font-size: 12px; font-weight: 500; line-height: 2">[[${chanchat.sendername}]]
+								[[${chanchat.time}]]</div>
+							<div class="description">[[${chanchat.content}]]</div>
+						</div>
+					</div>
+
+				</th:block>
+
+			</div>
+			<form id="messageForm" name="messageForm">
+				<div>
+					<input type="text" id="message"></input>
+					<!-- 					<button type="submit" class="ui button">보내기</button> -->
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<!-- 모달 -->
+	<!-- 채널추가 모달 -->
+	<div class="ui tiny modal appendchannelmodal">
+		<i class="close icon"></i>
+		<div class="header" style="background-color: #222f3e; color: #ece5ce">채 널 추 가</div>
+		<form action="appendChannel" method="POST"
+			style="margin-left: 20px; margin-right: 20px">
+			<div class="content">
+				<input type="hidden" th:value="0" name="useridsinmodal">
+				<div class="ui grid">
+					<div class="three wide column"></div>
+					<div class="ten wide column" style="margin-top: 10px">
+						<div class="ui fluid labeled input">
+							<div class="ui label">채 널 명</div>
+							<input name="channelname" id="channelname" class="ui input"
+								type="text" placeholder="채널의 이름을 입력해주세요.">
+						</div>
+					</div>
+					<div class="three wide column"></div>
+				</div>
+				<table class="ui celled table center aligned">
+					<thead>
+						<tr>
+							<th style="width: 45%">이메일</th>
+							<th style="width: 35%">이름</th>
+							<th style="width: 20%">선택</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="user : ${users}">
+							<td th:text="${user.email}"></td>
+							<td th:text="${user.name}"></td>
+							<td>
+								<div class="ui checked checkbox">									
+									<input type="checkbox" checked th:value="${user.userid}"
+										name="useridsinmodal"> <label></label>
+									<!-- 라벨이 없으면 체크박스 안나옴 -->
+								</div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="actions">
+				<div class="ui grid sixteen wide column"
+					style="margin-top: 3px; margin-bottom: 3px">
+					<div class="three wide column"></div>
+					<div class="five wide column">
+						<button type="button" class="ui red fluid inverted button"
+							onclick="appendchannelmodalcancel()" style="font-size: 15px;">취 소</button>
+					</div>
+					<div class="five wide column">
+						<button type="submit" class="ui green ok fluid inverted button"
+							style="font-size: 15px;">확 인</button>
+					</div>
+					<div class="three wide column"></div>
+				</div>
+			</div>
+		</form>
+	</div>
+
+	<!-- 회원정보 수정 모달 -->
+	<div class="ui small modal updatemembermodal">
+		<i class="close icon"></i>
+		<div class="header"> 변경 사항을 수정하거나 입력해주세요. </div>
+		<div class="ui icon header">
+			<i class="address card icon"></i> 회원정보 수정
+		</div>
+		<form id="updateUser" method="POST">
+			<div class="content"
+				style="margin-left: 30px; margin-right: 30px; margin-top: 30px; margin-bottom: 30px">
+				<div class="ui grid sixteen wide column">
+					<div class="eleven wide column">
+						<div class="ui labeled fluid input" style="margin-top: -10px">
+							<div class="ui label" id="labelwidth">이 름</div>
+							<input type="text" th:value="${user.name}" name="name">
+						</div>
+						<div class="ui labeled fluid input" id="labeldinputmargin">
+							<div class="ui label" id="labelwidth">폰 번호</div>
+							<input type="number" th:value="${user.phone}" maxlength="11"
+								oninput="numberMaxLength(this)" name="phone">
+						</div>
+						<div class="ui labeled fluid input" id="labeldinputmargin">
+							<div class="ui label" id="labelwidth">맡은 일</div>
+							<input type="text" th:value="${user.job}" name="job">
+						</div>
+						<div class="ui labeled fluid input" id="labeldinputmargin">
+							<div class="ui label" id="labelwidth">비밀번호</div>
+							<input type="password" placeholder="비밀번호 변경시에만 입력해주세요"
+								name="pwd1" id="pwd1">
+						</div>
+						<div class="ui labeled fluid input" id="labeldinputmargin">
+							<div class="ui label" id="labelwidth">비번확인</div>
+							<input type="password" placeholder="비밀번호 재확인" name="pwd2"
+								id="pwd2">
+						</div>
+					</div>
+					<div class="five wide column center aligned">
+						<img th:src="${user.photo}" onclick="viewphoto()" style="cursor:pointer"
+							title="클릭하면 이미지 변경" height="150px" width="150px">
+					</div>
+				</div>
+			</div>
+			<div class="actions">
+				<div class="ui grid sixteen wide column"
+					style="margin-top: -40px; margin-bottom: 1px">
+					<div class="eight wide column right aligned">
+						<button type="button" class="ui red inverted button"
+							onclick="updateMemberCancelBtn()">
+							<i class="remove icon"></i> 취 소
+						</button>
+					</div>
+					<div class="eight wide column left aligned">
+						<button type="button" class="ui green ok inverted button"
+							onclick="updateMemberBtn()">
+							<i class="checkmark icon"></i> 확 인
+						</button>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	
+	<!-- 아바타 모달 -->
+	<div class="ui large modal avatasmodal">
+		<i class="close icon"></i>
+		<div class="header"> 아바타를 두번 클릭하여 골라주세요 </div>
+		<form action="updateAvata" method="POST">
+			<div class="content">
+			<div class="ui grid sixteen wide column center aligned" style="margin-top:10px">
+				<div class= "three wide column"></div>
+					<div class= "ten wide column">
+						<input type="hidden" id="avata" name="avata">
+						<a th:each="avata : ${avatas}">
+							<img th:src="${avata.adress}" class="avata image" ondblclick="selectAvata(this)" height="70px" width="70px">
+						</a>
+					</div>
+				<div class= "three wide column"></div>
+			</div>
+			</div>
+			<div class="actions">
+				<div class="ui grid sixteen wide column"
+					style="margin-bottom: 20px; margin-top: 10px">
+					<div class="eight wide column right aligned">
+						<button type="button" class="ui blue button" onclick="viewphotocancel()">
+							<i class="remove icon"></i> 취 소
+						</button>
+					</div>
+					<div class="eight wide column left aligned">
+						<button type="submit" class="ui green button">
+							<i class="checkmark icon"></i> 확 인
+						</button>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+
+	<div class="ui mini modal notsamepassword">
+		<div class="header"></div>
+		<div class="content">
+			<p>비밀번호들이 같지 않습니다.</p>
+		</div>
+		<div class="actions">
+			<div class="ui approve button">확 인</div>
+		</div>
+	</div>
+
+	<!-- 워크스페이스 수정 모달 -->
+	<div class="ui tiny modal updateworkspacemodal">
+		<i class="close icon"></i>
+		<div class="header">
+    		변경 사항을 수정 또는 입력해주세요.
+  		</div>
+		<div class="ui icon header">
+			<i class="warehouse icon"></i> 워크스페이스 수정
+		</div>
+		<form action="updateWorkspace" method="POST">
+			<input type="hidden" id="workid" name="workid">
+			<div class="content"
+				style="margin-left: 30px; margin-right: 30px; margin-top: 30px; margin-bottom: 30px">
+				<div class="ui labeled fluid input" style="margin-top:-10px">
+					<div class="ui label" id="labelwidth">이 름</div>
+					<input type="text" id="name" name="name">
+				</div>
+				<div class="ui labeled fluid input" id="labeldinputmargin">
+					<div class="ui label" id="labelwidth">오너 양도</div>
+					<input type="email" id="owneremail" name="owneremail">
+				</div>
+				<div class="ui labeled fluid input" id="labeldinputmargin">
+					<div class="ui label" id="labelwidth">멤버 초대</div>
+					<input type="email" placeholder="지인의 이메일을 이력해주세요" name="inviteemail">
+				</div>
+				<div class="ui labeled fluid input" id="labeldinputmargin">
+					<div class="ui label">워크스페이스 탈퇴</div>
+					<input type="password" placeholder="탈퇴 확인용 비밀번호를 입력해주세요"
+						name="withdrawpwd">
+				</div>
+				<div class="ui labeled fluid input" id="labeldinputmargin">
+					<div class="ui label">워크스페이스 삭제</div>
+					<input type="password" placeholder="삭제 확인용 비밀번호를 입력해주세요"
+						name="deletepwd">
+				</div>
+			</div>
+			<div class="actions">
+				<div class="ui grid sixteen wide column"
+					style="margin-top: -30px; margin-bottom: 1px">
+					<div class="eight wide column right aligned">
+						<button type="button" class="ui red inverted button"
+							onclick="updateWorkSpaceCancelBtn()">
+							<i class="remove icon"></i> 취 소
+						</button>
+					</div>
+					<div class="eight wide column left aligned">
+						<button type="submit" class="ui green ok inverted button">
+							<i class="checkmark icon"></i> 확 인
+						</button>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	
+	<!-- 채널 수정 모달 -->
+	<div class="ui tiny modal updatechannelmodal">
+		<i class="close icon"></i>
+		<div class="header">
+    		변경 사항을 수정 또는 입력해주세요.
+  		</div>
+		<div class="ui icon header">
+			<i class="edit icon"></i> 채널 수정
+		</div>
+		<form action="updateChannel" method="POST">
+			<div class="content"
+				style="margin-left: 30px; margin-right: 30px; margin-top: 30px; margin-bottom: 30px">
+				<div class="ui labeled fluid input" style="margin-top:-10px">
+					<div class="ui label" id="labelwidth">이 름</div>
+					<input type="text" th:value="${channel.name}" name="name">
+				</div>
+				<div class="ui labeled fluid input" id="labeldinputmargin">
+					<div class="ui label" id="labelwidth">상세설명</div>
+					<input type="text" th:value="${channel.description}" name="description">
+				</div>
+				<div class="ui labeled fluid input" id="labeldinputmargin">
+					<div class="ui label" id="labelwidth">멤버 초대</div>
+					<input type="email" placeholder="지인의 이메일을 이력해주세요" name="inviteemail">
+				</div>
+				<div class="ui labeled fluid input" id="labeldinputmargin" data-tooltip="채널이 하나 이상이어야 삭제됩니다.">
+					<div class="ui label" id="labelwidth">채널 삭제</div>
+					<input type="password" placeholder="비밀번호를 입력하면 채널이 삭제됩니다." name="deletepwd">
+				</div>
+				
+			</div>
+			<div class="actions">
+				<div class="ui grid sixteen wide column"
+					style="margin-top: -30px; margin-bottom: 1px">
+					<div class="eight wide column right aligned">
+						<button type="button" class="ui red inverted button"
+							onclick="updateChannelCancelBtn()">
+							<i class="remove icon"></i> 취 소
+						</button>
+					</div>
+					<div class="eight wide column left aligned">
+						<button type="submit" class="ui green ok inverted button">
+							<i class="checkmark icon"></i> 확 인
+						</button>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	
+	<div class="ui mini modal withdrawworkspacemodal">
+		<div class="header">정말로 탈퇴하시겠습니까?</div>
+		<div class="content">
+			<span>워크스페이스가 하나 이상이어야 탈퇴됩니다.</span>
+		</div>
+		<div class="actions">
+			<form action="withdrawWorkspace" method="POST">
+				<input type="hidden" id="withdrawworkid" name="workid">
+				<div class="ui positive button" onclick="withdrawWorkCancelBtn()">취 소</div>
+				<button type="submit" class="ui negative button">확 인</button>
+			</form>
+		</div>
+	</div>
+	
+	<div class="ui mini modal withdrawchannelmodal">
+		<div class="header">정말로 탈퇴하시겠습니까?</div>
+		<div class="content">
+			<span>워크스페이스에 채널이 하나 이상이어야 탈퇴됩니다.</span>
+		</div>
+		<div class="actions">
+			<div class="ui positive button" onclick="withdrawChanCancelBtn()">취 소</div>
+			<div class="ui negative button" onclick="location.href='withdrawChannel'">확 인</div>
+		</div>
+	</div>
+	<!-- /모달 -->
+</div>
+
+<th:block layout:fragment="js">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.4.0/sockjs.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+	<script src="/js/main.js"></script>
+	<script th:inline="javascript">
+		chanids = /*[[${chanids}]]*/null;
+		roomids = /*[[${roomids}]]*/null;
+		username = /*[[${session.sessionUsername}]]*/null;
+		userid = /*[[${session.sessionUserid}]]*/null;
+		channelNo = /*[[${channelNo}]]*/null;
+		msgroomNo = /*[[${msgroomNo}]]*/null;
+		members = /*[[${members}]]*/null;
+	</script>
+	<script>
+		window.onload=connect();
+		var contentLayout = document.querySelector('.contentLayout');
+		var messageInput = document.querySelector('#message');
+		contentLayout.scrollTop = contentLayout.scrollHeight;	
+		messageInput.focus();
+		
+		$('#channel-list')
+		  .accordion({
+		    selector: {
+		      trigger: '.title' 
+		    },
+		});
+		
+		let d = new Date();
+		let month = d.getMonth()+1;
+		let str = "00"+month;
+		let month2 = str.slice(-2);
+		let day = d.getDate();
+		let currentHour = ( d.getHours() ) < 12 ? `AM ${d.getHours()}` : `PM ${d.getHours()-12}`;
+		let currentMin = d.getMinutes();
+		let today_day = `${month2}월 ${day}일`;
+		let today_time = `${currentHour}시 ${currentMin}분`;
+		
+		var id = (channelNo !== null) ? channelNo : msgroomNo;
+		resetunreadmsg(id);
+		showunreadmsg();
+	
+	</script>
+</th:block>
+</html>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ee.hive.dao.MsgChatDao">
+
+	<select id="selectMessage" resultType="com.ee.hive.entities.MsgChat">
+		select *, (select photo from user where userid=A.senderid) as senderavata, 
+		DATE_FORMAT(createdat,'%m월 %d일') as day, DATE_FORMAT(createdat,'%p %h시 %i분') as time from msgchat A 
+		where roomseq = #{roomseq};
+	</select>
+	
+	<select id="selectLastMsg"
+		resultType="com.ee.hive.entities.MsgChat">
+		select * from msgchat
+		where seq = (select max(chatseq) from msgchat where roomseq = #{chatseq} )
+	</select>
+
+	<select id="selectAll" resultType="com.ee.hive.entities.MsgChat">
+		select * from msgchat
+	</select>
+	
+	<insert id="insertRow">
+		insert into msgchat(chatseq, roomseq, sendername, senderid, getterid, content, createdat, updatedat )
+		values(
+		(select ifnull(max(chatseq)+1,1) from msgchat as msgchat_alias),
+		#{roomseq},#{sendername}, #{senderid},#{getterid},#{content}, sysdate(), sysdate());
+	</insert>
+</mapper>
